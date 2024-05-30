@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Extension Options</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 4px;
+        min-width: 150px; /* Adjust this value to the width you want */
+      }
+      h3 {
+        color: #0223dc;
+        text-align: center;
+      }
+      .option {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+      }
+      .option input {
+        margin-right: 10px;
+      }
+    </style>
+    <script src="popup.js"></script>
+  </head>
+  <body>
+    <h3>On open elsa speak</h3>
+    <div class="option">
+      <input
+        type="radio"
+        id="playSound"
+        name="action"
+        value="playSound"
+        checked
+      />
+      <label for="playSound">Play sound</label>
+    </div>
+    <div class="option">
+      <input
+        type="radio"
+        id="startRecording"
+        name="action"
+        value="startRecording"
+      />
+      <label for="startRecording">Start recording</label>
+    </div>
+    <div class="option">
+        <input type="checkbox" id="hideDistractingInfo" name="hideDistractingInfo" />
+        <label for="hideDistractingInfo">Hide distracting info</label>
+    </div>    
+  </body>
+</html>

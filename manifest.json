@@ -1,0 +1,38 @@
+{
+  "name": "Elsa speak helper",
+  "version": "1.0",
+  "description": "A little extension to help you open ELSA speak website while surfing the web.",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.elsaspeak.com/en/learn-english/how-to-pronounce/*"],
+      "js": ["contentScript.js"]
+    }
+  ],
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/favicon16.png",
+      "32": "images/favicon32.png",
+      "48": "images/favicon48.png",
+      "128": "images/favicon128.png"
+    }
+  },
+  "icons": {
+    "16": "images/favicon16.png",
+    "32": "images/favicon32.png",
+    "48": "images/favicon48.png",
+    "128": "images/favicon128.png"
+  },
+  "manifest_version": 2
+}
