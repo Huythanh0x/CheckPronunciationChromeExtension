@@ -18,6 +18,7 @@ chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
   chrome.webRequest.onBeforeRequest.addListener(
     function (details) {
       if (
+        details.url.includes("https://tts.elsanow.co/") &&
         isPlaySoundOnPopup &&
         details.url.endsWith(".mp3") &&
         !details.url.endsWith("mic_start_sound.mp3") &&
