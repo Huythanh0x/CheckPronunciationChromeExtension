@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let startRecordingOption = document.getElementById("startRecording");
   let hideDistractingInfoCheckBox = document.getElementById("hideDistractingInfo");
   let shortcutText = document.getElementById('shortcut-link');
-  let startRecordingAfterAudioOption = document.getElementById("START_RECORDING_AFTER_AUDIO");
+  let startRecordingAfterAudioOption = document.getElementById("startRecordingAfterAudio");
     
   chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
     if (data.IS_PLAY_SOUND_ON_POPUP === undefined) {
