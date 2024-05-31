@@ -7,36 +7,38 @@ chrome.runtime.onInstalled.addListener(function (object) {
 });
 
 // Below logic for playing sound when the options are enabled
-// Because of the fact that view.click() doesn't play sound, we have to use the Audio object to amanually play the audio
+// Because of the fact that view.click() doesn't play sound when the web is newly opened for the first time, we have to use the Audio object to amanually play the audio
 let lastPlaySoundTime = 0;
 const PLAYSOUND_WAITING_TIME = 3000;
-let hasPlayMainAudio = false;
-
+let onNeedManualPlaySound = false;
 chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
   let isPlaySoundOnPopup = data.IS_PLAY_SOUND_ON_POPUP !== false;
   chrome.webRequest.onBeforeRequest.addListener(
     function (details) {
       if (
         details.url.includes("https://tts.elsanow.co/") &&
-        isPlaySoundOnPopup &&
         details.url.endsWith(".mp3") &&
         !details.url.endsWith("mic_start_sound.mp3") &&
-        !details.url.endsWith("mic_stop_sound.mp3") &&
-        hasPassedWatingTime()
+        !details.url.endsWith("mic_stop_sound.mp3")
       ) {
-        let audio = new Audio(details.url);
-        audio.play();
-        hasPlayMainAudio = true;
-        audio.onended = function() {
-          chrome.storage.local.get("START_RECORDING_AFTER_AUDIO", function (data) {
-            if (data.START_RECORDING_AFTER_AUDIO === true) {
-              chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                //delay one second to make sure the audio is played
-                setTimeout(() => { chrome.tabs.sendMessage(tabs[0].id, {action: "startRecording"}); }, 1000);
-              });
-            }
-          });
-        };
+        if (
+          onNeedManualPlaySound &&
+          isPlaySoundOnPopup &&
+          hasPassedWatingTime()
+        ) {
+          alert("Playing sound");
+          let audio = new Audio(details.url);
+          audio.play();
+          onNeedManualPlaySound = false;
+          audio.onended = function () {
+            startRecording();
+          };
+        } else if (isPlaySoundOnPopup && hasPassedWatingTime()) {
+          alert("No Playing sound");
+          setTimeout(() => {
+            startRecording();
+          }, PLAYSOUND_WAITING_TIME);
+        }
       }
     },
     { urls: ["<all_urls>"] }
@@ -51,23 +53,26 @@ chrome.contextMenus.create({
 
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
   const query = info.selectionText.toLowerCase().replace(/ /g, "-");
-  openElsaSpeak(query)
+  openElsaSpeak(query);
 });
 
-//add shortcut listener to open elsa 
-chrome.commands.onCommand.addListener(function(command) {
-  if (command === 'open_elsa_speak') {
+//add shortcut listener to open elsa
+chrome.commands.onCommand.addListener(function (command) {
+  if (command === "open_elsa_speak") {
     // Your code here
-    chrome.tabs.executeScript({
-      code: `window.getSelection().toString();`,
-    }, function(results) {
-      if (chrome.runtime.lastError || !results || !results.length) {
-        // An error occurred or no text was selected
-        return;
+    chrome.tabs.executeScript(
+      {
+        code: `window.getSelection().toString();`,
+      },
+      function (results) {
+        if (chrome.runtime.lastError || !results || !results.length) {
+          // An error occurred or no text was selected
+          return;
+        }
+        const query = results[0].toLowerCase().replace(/ /g, "-");
+        openElsaSpeak(query);
       }
-      const query = results[0].toLowerCase().replace(/ /g, "-");
-      openElsaSpeak(query)
-    });
+    );
   }
 });
 
@@ -82,9 +87,21 @@ function hasPassedWatingTime() {
 }
 
 function openElsaSpeak(query) {
+  onNeedManualPlaySound = true;
   chrome.windows.create({
     url: `https://elsaspeak.com/en/learn-english/how-to-pronounce/${query}`,
     focused: true,
-    type: "normal"
+    type: "normal",
+  });
+}
+
+function startRecording() {
+  chrome.storage.local.get("START_RECORDING_AFTER_AUDIO", function (data) {
+    if (data.START_RECORDING_AFTER_AUDIO === true) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        //delay one second to make sure the audio is played
+        chrome.tabs.sendMessage(tabs[0].id, { action: "startRecording" });
+      });
+    }
   });
 }
