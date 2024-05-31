@@ -16,21 +16,22 @@ chrome.runtime.onMessage.addListener(
   }
 );
 
-chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
-  let isPlaySoundOnPopup = data.IS_PLAY_SOUND_ON_POPUP !== false;
-  window.onload = function () {
+window.onload = function () {
+  convertWordToElsaLink();
+  chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
+    let isPlaySoundOnPopup = data.IS_PLAY_SOUND_ON_POPUP !== false;
     let firstViewClass = isPlaySoundOnPopup
-      ? ".elsa-card.elsa-card-1"
-      : ".elsa-card.elsa-card-2";
-    let card = document.querySelector(firstViewClass);
-    if (card) {
-      card.scrollIntoView();
-      window.scrollBy(0, -80);
-    }
-    let observer = new MutationObserver(hideElements(isPlaySoundOnPopup));
-    observer.observe(document, { childList: true, subtree: true });
-  };
-});
+    ? ".elsa-card.elsa-card-1"
+    : ".elsa-card.elsa-card-2";
+  let card = document.querySelector(firstViewClass);
+  if (card) {
+    card.scrollIntoView();
+    window.scrollBy(0, -80);
+  }
+  let observer = new MutationObserver(hideElements(isPlaySoundOnPopup));
+  observer.observe(document, { childList: true, subtree: true });
+  });
+};
 
 function hideElements(isPlaySoundOnPopup) {
   return function (mutationsList, observer) {
@@ -99,4 +100,33 @@ function simulateFistButtonClick(isPlaySoundOnPopup) {
       hasSimulatedClick = true;
     }
   }
+}
+
+//convert all words in vocabulary card to elsa speak link
+function convertWordToElsaLink() {
+  const definitionElements = document.querySelectorAll('.elsa-card__definition-text');
+  const exampleElements = document.querySelectorAll('ul.elsa-card__example-text li');
+
+  function convertTextToLink(element) {
+      const words = element.textContent.split(' ');
+      element.textContent = ''; // Clear the original text
+      words.forEach((word, index) => {
+          // Remove non-word characters from the word
+          const cleanedWord = word.replace(/\W/g, '');
+          if (cleanedWord) {
+              const link = document.createElement('a');
+              link.href = `https://elsaspeak.com/en/learn-english/how-to-pronounce/${encodeURIComponent(cleanedWord)}`;
+              link.textContent = word;
+              link.style.color = 'inherit';
+              element.appendChild(link);
+              // Add a space after each word, except the last one
+              if (index < words.length - 1) {
+                  element.appendChild(document.createTextNode(' '));
+              }
+          }
+      });
+  }
+
+  definitionElements.forEach(convertTextToLink);
+  exampleElements.forEach(convertTextToLink);
 }
