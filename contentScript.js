@@ -2,6 +2,20 @@ const RECORDING_WAITING_TIME = 3000;
 let lastRecordClickTime = 0;
 let hasSimulatedClick = false;
 
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    if (request.action === "startRecording") {
+      let btnPractice = document.getElementById("btn-practice");
+      let clickEvent = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      });
+      btnPractice.dispatchEvent(clickEvent);
+    }
+  }
+);
+
 chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
   let isPlaySoundOnPopup = data.IS_PLAY_SOUND_ON_POPUP !== false;
   window.onload = function () {

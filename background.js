@@ -6,7 +6,7 @@ chrome.runtime.onInstalled.addListener(function (object) {
   }
 });
 
-// Below logic soly for playing sound when the options are enabled
+// Below logic for playing sound when the options are enabled
 // Because of the fact that view.click() doesn't play sound, we have to use the Audio object to amanually play the audio
 let lastPlaySoundTime = 0;
 const PLAYSOUND_WAITING_TIME = 3000;
@@ -27,6 +27,16 @@ chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
         let audio = new Audio(details.url);
         audio.play();
         hasPlayMainAudio = true;
+        audio.onended = function() {
+          chrome.storage.local.get("START_RECORDING_AFTER_AUDIO", function (data) {
+            if (data.START_RECORDING_AFTER_AUDIO === true) {
+              chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                //delay one second to make sure the audio is played
+                setTimeout(() => { chrome.tabs.sendMessage(tabs[0].id, {action: "startRecording"}); }, 1000);
+              });
+            }
+          });
+        };
       }
     },
     { urls: ["<all_urls>"] }

@@ -3,7 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
   let startRecordingOption = document.getElementById("startRecording");
   let hideDistractingInfoCheckBox = document.getElementById("hideDistractingInfo");
   let shortcutText = document.getElementById('shortcut-link');
-  
+  let startRecordingAfterAudioOption = document.getElementById("START_RECORDING_AFTER_AUDIO");
+    
   chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
     if (data.IS_PLAY_SOUND_ON_POPUP === undefined) {
         chrome.storage.local.set({ IS_PLAY_SOUND_ON_POPUP: true}); 
@@ -29,6 +30,16 @@ document.addEventListener("DOMContentLoaded", function () {
     hideDistractingInfoCheckBox.checked = data.HIDE_DISTRACTING_INFO === true;
     hideDistractingInfoCheckBox.addEventListener("change", function () {
       chrome.storage.local.set({ HIDE_DISTRACTING_INFO: this.checked });
+    });
+  });
+  chrome.storage.local.get("START_RECORDING_AFTER_AUDIO", function (data) {
+    if (data.START_RECORDING_AFTER_AUDIO === undefined) {
+        chrome.storage.local.set({ START_RECORDING_AFTER_AUDIO: false}); 
+        data.START_RECORDING_AFTER_AUDIO = false;
+    }
+    startRecordingAfterAudioOption.checked = data.START_RECORDING_AFTER_AUDIO === true;
+    startRecordingAfterAudioOption.addEventListener("change", function () {
+      chrome.storage.local.set({ START_RECORDING_AFTER_AUDIO: this.checked });
     });
   });
   shortcutText.addEventListener('click', function(e) {
