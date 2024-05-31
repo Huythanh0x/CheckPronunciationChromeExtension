@@ -1,10 +1,9 @@
 "use strict";
 chrome.runtime.onInstalled.addListener(function (object) {
-    let externalUrl = "https://gitea.thanh0x.com/huythanh0x";
-    if (object.reason === chrome.runtime.OnInstalledReason.INSTALL) {
-        chrome.tabs.create({ url: externalUrl }, function (tab) {            
-        });
-    }
+  let externalUrl = "https://gitea.thanh0x.com/huythanh0x";
+  if (object.reason === chrome.runtime.OnInstalledReason.INSTALL) {
+    chrome.tabs.create({ url: externalUrl }, function (tab) {});
+  }
 });
 
 // Below logic soly for playing sound when the options are enabled
@@ -43,19 +42,11 @@ chrome.contextMenus.create({
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
   const query = info.selectionText.toLowerCase().replace(/ /g, "-");
 
-  chrome.tabs.create(
-    {
-      url: `https://elsaspeak.com/en/learn-english/how-to-pronounce/${query}`,
-      active: false,
-    },
-    function (tab) {
-      chrome.windows.create({
-        tabId: tab.id,
-        type: "popup",
-        focused: true,
-      });
-    }
-  );
+  chrome.windows.create({
+    url: `https://elsaspeak.com/en/learn-english/how-to-pronounce/${query}`,
+    focused: true,
+    type: "normal"
+  });
 });
 
 //avoid mutliple sound playing at the same time
