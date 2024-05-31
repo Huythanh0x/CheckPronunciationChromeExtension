@@ -35,18 +35,30 @@ chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
 
 chrome.contextMenus.create({
   id: "open-elsa-speak",
-  title: "Show in elsa speak",
+  title: "Show in elsa speak [Ctrl+Shift+Z]",
   contexts: ["selection"],
 });
 
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
   const query = info.selectionText.toLowerCase().replace(/ /g, "-");
+  openElsaSpeak(query)
+});
 
-  chrome.windows.create({
-    url: `https://elsaspeak.com/en/learn-english/how-to-pronounce/${query}`,
-    focused: true,
-    type: "normal"
-  });
+//add shortcut listener to open elsa 
+chrome.commands.onCommand.addListener(function(command) {
+  if (command === 'open_elsa_speak') {
+    // Your code here
+    chrome.tabs.executeScript({
+      code: `window.getSelection().toString();`,
+    }, function(results) {
+      if (chrome.runtime.lastError || !results || !results.length) {
+        // An error occurred or no text was selected
+        return;
+      }
+      const query = results[0].toLowerCase().replace(/ /g, "-");
+      openElsaSpeak(query)
+    });
+  }
 });
 
 //avoid mutliple sound playing at the same time
@@ -57,4 +69,12 @@ function hasPassedWatingTime() {
     return true;
   }
   return false;
+}
+
+function openElsaSpeak(query) {
+  chrome.windows.create({
+    url: `https://elsaspeak.com/en/learn-english/how-to-pronounce/${query}`,
+    focused: true,
+    type: "normal"
+  });
 }

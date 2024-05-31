@@ -1,4 +1,5 @@
 {
+  "manifest_version": 2,
   "name": "Elsa speak helper",
   "version": "1.0",
   "description": "A little extension to help you open ELSA speak website while surfing the web.",
@@ -34,5 +35,12 @@
     "48": "images/favicon48.png",
     "128": "images/favicon128.png"
   },
-  "manifest_version": 2
+  "commands": {
+    "open_elsa_speak": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Z"
+      },
+      "description": "Open pronunciation guide"
+    }
+  }
 }

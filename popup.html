@@ -20,6 +20,33 @@
       .option input {
         margin-right: 10px;
       }
+      .modify-shortcut {
+        color: blue;
+        text-decoration: underline;
+        text-align: center;
+        cursor: pointer;
+      }
+      .custom-alert {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #fefefe;
+      }
+
+      .custom-alert-content {
+        background-color: #fefefe;
+        margin: 0 auto;
+        padding: 5px;
+        border: 1px solid #888;
+        width: 100%;
+      }
+      .shortcut-url-text {
+        color: blue;
+        cursor: pointer;
+      }
     </style>
     <script src="popup.js"></script>
   </head>
@@ -47,6 +74,14 @@
     <div class="option">
         <input type="checkbox" id="hideDistractingInfo" name="hideDistractingInfo" />
         <label for="hideDistractingInfo">Hide distracting info</label>
-    </div>    
+    </div>
+    <hr>
+    <div id="shortcut-link" class="modify-shortcut">Modify shortcut</div>
+
+    <div id="custom-alert" class="custom-alert">
+      <div class="custom-alert-content">
+        <p>Please navigate to <span id="shortcut-url-text" class="shortcut-url-text"></span> to modify the shortcut.</p>
+      </div>
+    </div>
   </body>
 </html>
