@@ -2,9 +2,17 @@
 
 #### Features
 - [x] Open selected in elsa website [how to pronunounce](https://elsaspeak.com/en/learn-english/how-to-pronounce/?word=pronunciation)
+- [x] Shortcut and open custom short cut from popup (Ctrl+Shift+Z)
 - [x] Enable user to choose first action on open dialog(play audio or start recording)
 - [x] Add setting to hide distracting banners and dialogs
-
+- [x] Enable start recording when audio completed
+- [x] Enable click on word in vocab card container(elsa website)  to open new elsa word
+---
+---
+### TODO list
+- [ ] Additional banner beside or below recording: list related words(family words, synonym, antonym, ...)
+- [ ] Allow adanvanced settings [padding from top, list banners to choose to hide]
+- [ ] Add a littlde pin/popup icon for easier access, then a setting for it at popup too
 ---
 ---
 ### Some Screenshsots
