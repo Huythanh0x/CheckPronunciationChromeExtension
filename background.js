@@ -9,7 +9,7 @@ chrome.runtime.onInstalled.addListener(function (object) {
 // Below logic for playing sound when the options are enabled
 // Because of the fact that view.click() doesn't play sound when the web is newly opened for the first time, we have to use the Audio object to amanually play the audio
 let lastPlaySoundTime = 0;
-const PLAYSOUND_WAITING_TIME = 3000;
+const PLAYSOUND_WAITING_TIME = 2000;
 let onNeedManualPlaySound = false;
 chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
   let isPlaySoundOnPopup = data.IS_PLAY_SOUND_ON_POPUP !== false;
@@ -26,7 +26,6 @@ chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
           isPlaySoundOnPopup &&
           hasPassedWatingTime()
         ) {
-          alert("Playing sound");
           let audio = new Audio(details.url);
           audio.play();
           onNeedManualPlaySound = false;
@@ -34,7 +33,6 @@ chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
             startRecording();
           };
         } else if (isPlaySoundOnPopup && hasPassedWatingTime()) {
-          alert("No Playing sound");
           setTimeout(() => {
             startRecording();
           }, PLAYSOUND_WAITING_TIME);
