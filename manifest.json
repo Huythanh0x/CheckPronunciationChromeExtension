@@ -40,7 +40,7 @@
       "suggested_key": {
         "default": "Ctrl+Shift+Z"
       },
-      "description": "Open pronunciation guide"
+      "description": "Open selected/highlighed word in elsa websie"
     }
   }
 }
