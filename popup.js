@@ -35,8 +35,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   chrome.storage.local.get("HIDE_DISTRACTING_INFO", function (data) {
     if (data.HIDE_DISTRACTING_INFO === undefined) {
-        chrome.storage.local.set({ HIDE_DISTRACTING_INFO: false}); 
-        data.HIDE_DISTRACTING_INFO = false;
+        chrome.storage.local.set({ HIDE_DISTRACTING_INFO: true}); 
+        data.HIDE_DISTRACTING_INFO = true;
     }
     hideDistractingInfoCheckBox.checked = data.HIDE_DISTRACTING_INFO === true;
     hideDistractingInfoCheckBox.addEventListener("change", function () {
@@ -45,8 +45,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   chrome.storage.local.get("START_RECORDING_AFTER_AUDIO", function (data) {
     if (data.START_RECORDING_AFTER_AUDIO === undefined) {
-        chrome.storage.local.set({ START_RECORDING_AFTER_AUDIO: false}); 
-        data.START_RECORDING_AFTER_AUDIO = false;
+        chrome.storage.local.set({ START_RECORDING_AFTER_AUDIO: true}); 
+        data.START_RECORDING_AFTER_AUDIO = true;
     }
     startRecordingAfterAudioCheckbox.checked = data.START_RECORDING_AFTER_AUDIO === true;
     startRecordingAfterAudioCheckbox.addEventListener("change", function () {
