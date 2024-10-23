@@ -3,13 +3,13 @@ document.addEventListener("DOMContentLoaded", function () {
   let startRecordingOption = document.getElementById("startRecording");
   let hideDistractingInfoCheckBox = document.getElementById("hideDistractingInfo");
   let shortcutText = document.getElementById('shortcut-link');
-  let startRecordingAfterAudioOption = document.getElementById("startRecordingAfterAudio");
+  let startRecordingAfterAudioCheckbox = document.getElementById("startRecordingAfterAudio");
 
   function updateStartRecordingAfterAudioVisibility() {
     if (playSoundOption.checked) {
-      startRecordingAfterAudioOption.style.display = 'block';
+      startRecordingAfterAudioCheckbox.style.display = 'block';
     } else {
-      startRecordingAfterAudioOption.style.display = 'none';
+      startRecordingAfterAudioCheckbox.style.display = 'none';
     }
   }
 
@@ -48,8 +48,8 @@ document.addEventListener("DOMContentLoaded", function () {
         chrome.storage.local.set({ START_RECORDING_AFTER_AUDIO: false}); 
         data.START_RECORDING_AFTER_AUDIO = false;
     }
-    startRecordingAfterAudioOption.checked = data.START_RECORDING_AFTER_AUDIO === true;
-    startRecordingAfterAudioOption.addEventListener("change", function () {
+    startRecordingAfterAudioCheckbox.checked = data.START_RECORDING_AFTER_AUDIO === true;
+    startRecordingAfterAudioCheckbox.addEventListener("change", function () {
       chrome.storage.local.set({ START_RECORDING_AFTER_AUDIO: this.checked });
     });
   });
