@@ -1,6 +1,6 @@
 "use strict";
 chrome.runtime.onInstalled.addListener(function (object) {
-  let externalUrl = "https://gitea.thanh0x.com/huythanh0x";
+  let externalUrl = "https://github.com/Huythanh0x/CheckPronunciationChromeExtension";
   if (object.reason === chrome.runtime.OnInstalledReason.INSTALL) {
     chrome.tabs.create({ url: externalUrl }, function (tab) {});
   }
