@@ -4,7 +4,15 @@ document.addEventListener("DOMContentLoaded", function () {
   let hideDistractingInfoCheckBox = document.getElementById("hideDistractingInfo");
   let shortcutText = document.getElementById('shortcut-link');
   let startRecordingAfterAudioOption = document.getElementById("startRecordingAfterAudio");
-    
+
+  function updateStartRecordingAfterAudioVisibility() {
+    if (playSoundOption.checked) {
+      startRecordingAfterAudioOption.style.display = 'block';
+    } else {
+      startRecordingAfterAudioOption.style.display = 'none';
+    }
+  }
+
   chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
     if (data.IS_PLAY_SOUND_ON_POPUP === undefined) {
         chrome.storage.local.set({ IS_PLAY_SOUND_ON_POPUP: true}); 
@@ -15,11 +23,14 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       playSoundOption.checked = true;
     }
+    updateStartRecordingAfterAudioVisibility();
     playSoundOption.addEventListener("change", function () {
       chrome.storage.local.set({ IS_PLAY_SOUND_ON_POPUP: this.checked });
+      updateStartRecordingAfterAudioVisibility();
     });
     startRecordingOption.addEventListener("change", function () {
       chrome.storage.local.set({ IS_PLAY_SOUND_ON_POPUP: !this.checked });
+      updateStartRecordingAfterAudioVisibility();
     });
   });
   chrome.storage.local.get("HIDE_DISTRACTING_INFO", function (data) {
@@ -49,19 +60,19 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function getExtensionShortcutUrl() {
-      // Detect browser
-      var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
-      var isEdge = !isChrome && !!window.StyleMedia;
-      var isBrave = isChrome && !!window.navigator.brave;
-      if (isBrave) {
-        return 'brave://extensions/shortcuts';
-      } else if (isChrome) {
-        return 'chrome://extensions/shortcuts';
-      } else if (isEdge) {
-        return 'edge://extensions/shortcuts';
-      } else {
-        return '#';
-      }
+  // Detect browser
+  var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+  var isEdge = !isChrome && !!window.StyleMedia;
+  var isBrave = isChrome && !!window.navigator.brave;
+  if (isBrave) {
+    return 'brave://extensions/shortcuts';
+  } else if (isChrome) {
+    return 'chrome://extensions/shortcuts';
+  } else if (isEdge) {
+    return 'edge://extensions/shortcuts';
+  } else {
+    return '#';
+  }
 }
 
 function displayShortcutPopup() {
