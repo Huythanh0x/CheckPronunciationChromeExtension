@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Check Pronunciation",
   "version": "0.1",
   "description": "Check your pronunciation with Elsa Speak while surfing the internet",
