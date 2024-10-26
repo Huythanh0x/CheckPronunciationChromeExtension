@@ -1,51 +1,40 @@
-const RECORDING_WAITING_TIME = 3000;
-let lastRecordClickTime = 0;
+const SOUND_PLAYING_WAITING_TIME = 3000;
 let hasSimulatedClick = false;
 
-chrome.runtime.onMessage.addListener(
-  function(request, sender, sendResponse) {
-    if (request.action === "startRecording") {
-      let btnPractice = document.getElementById("btn-practice");
-      let clickEvent = new MouseEvent("click", {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      });
-      btnPractice.dispatchEvent(clickEvent);
-    }
-  }
-);
-
 window.onload = function () {
+  //assure that this script only run on elsa speak website
+  if (!window.location.href.includes("https://elsaspeak.com/")) {
+    return;
+  }
+  
   convertWordToElsaLink();
   chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
     let isPlaySoundOnPopup = data.IS_PLAY_SOUND_ON_POPUP !== false;
-    let firstViewClass = isPlaySoundOnPopup
-    ? ".elsa-card.elsa-card-1"
-    : ".elsa-card.elsa-card-2";
-  let card = document.querySelector(firstViewClass);
-  if (card) {
-    card.scrollIntoView();
-    window.scrollBy(0, -80);
-  }
-  let observer = new MutationObserver(hideElements(isPlaySoundOnPopup));
-  observer.observe(document, { childList: true, subtree: true });
+    let recordingCard = document.querySelector(".elsa-card.elsa-card-2");
+    if (recordingCard) {
+      recordingCard.scrollIntoView();
+    }
+  
+    if (isPlaySoundOnPopup) {
+      playVocabularySound(() => {
+        chrome.storage.local.get("START_RECORDING_AFTER_AUDIO", function (data) {
+          if (data.START_RECORDING_AFTER_AUDIO === true) {
+            startRecording();
+          }
+        });
+      });
+    } else if (!isPlaySoundOnPopup) {
+      startRecording();
+    }
+    let observer = new MutationObserver(elementObserver(isPlaySoundOnPopup));
+    observer.observe(document, { childList: true, subtree: true });
   });
 };
 
-function hideElements(isPlaySoundOnPopup) {
+function elementObserver(isPlaySoundOnPopup) {
   return function (mutationsList, observer) {
     for (let mutation of mutationsList) {
       if (mutation.type === "childList") {
-        if (!hasSimulatedClick) {
-          simulateFistButtonClick(isPlaySoundOnPopup);
-        }
-        let btnPractice = document.getElementById("btn-practice");
-        if (btnPractice) {
-          if (hasPassedWatingTime()) {
-            btnPractice.click();
-          }
-        }
         chrome.storage.local.get("HIDE_DISTRACTING_INFO", function (data) {
           if (data.HIDE_DISTRACTING_INFO) {
             let elementsToHide = [
@@ -72,34 +61,6 @@ function hideElements(isPlaySoundOnPopup) {
       }
     }
   };
-}
-
-//prevent multiple clicks
-function hasPassedWatingTime() {
-  let currentTime = new Date().getTime();
-  if (currentTime - lastRecordClickTime >= RECORDING_WAITING_TIME) {
-    lastRecordClickTime = currentTime;
-    return true;
-  }
-  return false;
-}
-
-function simulateFistButtonClick(isPlaySoundOnPopup) {
-  let firstButtonId = isPlaySoundOnPopup
-    ? "btn-listen-to-the-word"
-    : "btn-practice";
-  let firstButtonView = document.getElementById(firstButtonId);
-  if (firstButtonView) {
-    if (hasPassedWatingTime() || isPlaySoundOnPopup) {
-      let clickEvent = new MouseEvent("click", {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      });
-      firstButtonView.dispatchEvent(clickEvent);
-      hasSimulatedClick = true;
-    }
-  }
 }
 
 //convert all words in vocabulary card to elsa speak link
@@ -130,3 +91,40 @@ function convertWordToElsaLink() {
   definitionElements.forEach(convertTextToLink);
   exampleElements.forEach(convertTextToLink);
 }
+
+function startRecording() {
+  let btnPractice = document.getElementById("btn-practice");
+      let clickEvent = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      });
+      btnPractice.dispatchEvent(clickEvent);
+}
+
+function playVocabularySound(callback) {
+  const urlFragments = window.location.href.split("/");
+  const sentence = urlFragments.pop();
+  const requestBody = {
+    sentence: sentence,
+    user_lang: "vi"
+  };
+  chrome.runtime.sendMessage(
+    {
+      action: "playVocabularySound",
+      requestBody: requestBody
+    },
+    (response) => {}
+  );
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "audioComplete") {
+    // alert("Audio playback completed");
+    chrome.storage.local.get("START_RECORDING_AFTER_AUDIO", function (data) {
+      if (data.START_RECORDING_AFTER_AUDIO === true) {
+        startRecording();
+      }
+    });
+  }
+});

@@ -1,4 +1,5 @@
-"use strict";
+const MIN_PLAY_INTERVAL = 2000; // Minimum interval between audio plays in milliseconds
+
 chrome.runtime.onInstalled.addListener(function (object) {
   let externalUrl = "https://github.com/Huythanh0x/CheckPronunciationChromeExtension";
   if (object.reason === chrome.runtime.OnInstalledReason.INSTALL) {
@@ -6,46 +7,47 @@ chrome.runtime.onInstalled.addListener(function (object) {
   }
 });
 
-// Below logic for playing sound when the options are enabled
-// Because of the fact that view.click() doesn't play sound when the web is newly opened for the first time, we have to use the Audio object to amanually play the audio
-let lastPlaySoundTime = 0;
-const PLAYSOUND_WAITING_TIME = 2000;
-let onNeedManualPlaySound = false;
-chrome.storage.local.get("IS_PLAY_SOUND_ON_POPUP", function (data) {
-  let isPlaySoundOnPopup = data.IS_PLAY_SOUND_ON_POPUP !== false;
-  chrome.webRequest.onBeforeRequest.addListener(
-    function (details) {
-      if (
-        details.url.includes("https://tts.elsanow.co/") &&
-        details.url.endsWith(".mp3") &&
-        !details.url.endsWith("mic_start_sound.mp3") &&
-        !details.url.endsWith("mic_stop_sound.mp3")
-      ) {
-        if (
-          onNeedManualPlaySound &&
-          isPlaySoundOnPopup &&
-          hasPassedWatingTime()
-        ) {
-          let audio = new Audio(details.url);
-          audio.play();
-          onNeedManualPlaySound = false;
-          audio.onended = function () {
-            startRecording();
-          };
-        } else if (isPlaySoundOnPopup && hasPassedWatingTime()) {
-          setTimeout(() => {
-            startRecording();
-          }, PLAYSOUND_WAITING_TIME);
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+  console.log('Received message:', message);
+  if (message.action === "playVocabularySound") {
+    const { requestBody } = message;
+    console.log('Received message `playVocabularySound`:', requestBody);
+    fetch('https://pool.elsanow.io/api/compute_dictionary', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    })
+    .then(response => response.json())
+    .then(data => {
+      const ttsUrl = data.tts_url;
+      console.log('Fetched TTS URL:', ttsUrl);
+      playSound(ttsUrl).then(() => {
+        sendResponse({ success: true }); 
+      }).catch(error => {
+        console.error('Error playing sound:', error);
+        sendResponse({ success: false });
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching TTS URL:', error);
+      sendResponse({ success: false });
+    });
+    return false;
+  } else if (message.action === "audioComplete") {
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+        if (tabs.length > 0) {
+          chrome.tabs.sendMessage(tabs[0].id, { action: "audioComplete" });
         }
-      }
-    },
-    { urls: ["<all_urls>"] }
-  );
+      });
+    }
 });
+
 
 chrome.contextMenus.create({
   id: "open-elsa-speak",
-  title: "Show in elsa speak [Ctrl+Shift+Z]",
+  title: "Show in elsa speak",
   contexts: ["selection"],
 });
 
@@ -57,7 +59,6 @@ chrome.contextMenus.onClicked.addListener(function (info, tab) {
 //add shortcut listener to open elsa
 chrome.commands.onCommand.addListener(function (command) {
   if (command === "open_elsa_speak") {
-    // Your code here
     chrome.tabs.executeScript(
       {
         code: `window.getSelection().toString();`,
@@ -74,18 +75,7 @@ chrome.commands.onCommand.addListener(function (command) {
   }
 });
 
-//avoid mutliple sound playing at the same time
-function hasPassedWatingTime() {
-  let currentTime = new Date().getTime();
-  if (currentTime - lastPlaySoundTime >= PLAYSOUND_WAITING_TIME) {
-    lastPlaySoundTime = currentTime;
-    return true;
-  }
-  return false;
-}
-
 function openElsaSpeak(query) {
-  onNeedManualPlaySound = true;
   chrome.windows.create({
     url: `https://elsaspeak.com/en/learn-english/how-to-pronounce/${query}`,
     focused: true,
@@ -93,13 +83,48 @@ function openElsaSpeak(query) {
   });
 }
 
-function startRecording() {
-  chrome.storage.local.get("START_RECORDING_AFTER_AUDIO", function (data) {
-    if (data.START_RECORDING_AFTER_AUDIO === true) {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        //delay one second to make sure the audio is played
-        chrome.tabs.sendMessage(tabs[0].id, { action: "startRecording" });
-      });
+
+async function playSound(source) {
+  await createOffscreen();
+  try {
+    const currentTime = Date.now();
+    const lastPlayTime = await getLastPlayTime();
+    //need logic check interval to prevent playsound too fast and duplication
+    if (currentTime - lastPlayTime >= MIN_PLAY_INTERVAL) {
+      await chrome.runtime.sendMessage({ play: { source, volume: 1 } });
+      await setLastPlayTime(currentTime);
+    } else {
+      console.log('Skipping play to avoid overlap');
     }
+  } catch (error) {
+    console.error('Error sending message to offscreen document:', error);
+  }
+}
+
+//manifest v3 drop `Audio` so this is the workaround to play sound
+async function createOffscreen() {
+  if (await chrome.offscreen.hasDocument()) return;
+  await chrome.offscreen.createDocument({
+    url: 'offscreen.html',
+    reasons: ['AUDIO_PLAYBACK'],
+    justification: 'Play audio for pronunciation'
+  });
+}
+
+// Get the last play time from Chrome storage
+async function getLastPlayTime() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['lastPlayTime'], (result) => {
+      resolve(result.lastPlayTime || 0);
+    });
+  });
+}
+
+// Set the last play time in Chrome storage
+async function setLastPlayTime(time) {
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ lastPlayTime: time }, () => {
+      resolve();
+    });
   });
 }

@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Check Pronunciation",
   "version": "0.1",
   "description": "Check your pronunciation with Elsa Speak while surfing the internet",
@@ -7,19 +7,24 @@
     "contextMenus",
     "storage",
     "webRequest",
-    "<all_urls>"
+    "activeTab",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "*://*.elsaspeak.com/en/learn-english/how-to-pronounce/*",
+    "*://tts.elsanow.co/*" 
   ],
   "background": {
-    "scripts": ["background.js"],
-    "persistent": true
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": ["*://*.elsaspeak.com/en/learn-english/how-to-pronounce/*"],
-      "js": ["contentScript.js"]
+      "js": ["contentScript.js"],
+      "run_at": "document_start"
     }
   ],
-  "browser_action": {
+  "action": {
     "default_popup": "popup.html",
     "default_icon": {
       "16": "images/favicon16.png",
@@ -27,7 +32,7 @@
       "48": "images/favicon48.png",
       "128": "images/favicon128.png"
     }
-  },
+},
   "icons": {
     "16": "images/favicon16.png",
     "32": "images/favicon32.png",

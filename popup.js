@@ -4,12 +4,13 @@ document.addEventListener("DOMContentLoaded", function () {
   let hideDistractingInfoCheckBox = document.getElementById("hideDistractingInfo");
   let shortcutText = document.getElementById('shortcut-link');
   let startRecordingAfterAudioCheckbox = document.getElementById("startRecordingAfterAudio");
+  let startRecordingAfterAudioContainer = document.getElementById("startRecordingAfterAudioContainer");
 
-  function updateStartRecordingAfterAudioVisibility() {
+  function updateStartRecordingAfterAudioContainerVisibility() {
     if (playSoundOption.checked) {
-      startRecordingAfterAudioCheckbox.style.display = 'block';
+      startRecordingAfterAudioContainer.style.display = 'block';
     } else {
-      startRecordingAfterAudioCheckbox.style.display = 'none';
+      startRecordingAfterAudioContainer.style.display = 'none';
     }
   }
 
@@ -23,14 +24,14 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       playSoundOption.checked = true;
     }
-    updateStartRecordingAfterAudioVisibility();
+    updateStartRecordingAfterAudioContainerVisibility();
     playSoundOption.addEventListener("change", function () {
       chrome.storage.local.set({ IS_PLAY_SOUND_ON_POPUP: this.checked });
-      updateStartRecordingAfterAudioVisibility();
+      updateStartRecordingAfterAudioContainerVisibility();
     });
     startRecordingOption.addEventListener("change", function () {
       chrome.storage.local.set({ IS_PLAY_SOUND_ON_POPUP: !this.checked });
-      updateStartRecordingAfterAudioVisibility();
+      updateStartRecordingAfterAudioContainerVisibility();
     });
   });
   chrome.storage.local.get("HIDE_DISTRACTING_INFO", function (data) {
